@@ -11,8 +11,7 @@ class User(db.Model):
     # is_superuser = db.Column(db.Boolean, default=False)
 
     def to_dict(self):
-        return {"Id_użytkownika": self.id, "nazwa_użytkownika": self.username}
-
+        return {"id": self.id, "username": self.username}
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
