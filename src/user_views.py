@@ -1,5 +1,5 @@
-from flask import Blueprint, jsonify, request, abort, make_response
-from flask_jwt_extended import create_access_token, set_access_cookies, jwt_required
+from flask import Blueprint, jsonify, request, abort
+from flask_jwt_extended import create_access_token, set_access_cookies, jwt_required, get_jwt_identity, unset_jwt_cookies
 from models import User, db
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -68,3 +68,11 @@ def user_login():
         return response
     else:
         return jsonify({"msg": f"User {username} failed login"})
+
+@user_bp.route('/logout', methods=['GET'])
+@jwt_required()
+def user_logout():
+    current_user = get_jwt_identity()
+    response = jsonify({"msg": f"User {current_user} logged out successfully."})
+    unset_jwt_cookies(response)
+    return response
