@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request, abort
+from flask_jwt_extended import jwt_required
 from models import Task, db
 from datetime import datetime
 
@@ -6,18 +7,21 @@ task_bp = Blueprint('task_bp', __name__)
 
 
 @task_bp.route('/tasks', methods=['GET'])
+@jwt_required()
 def get_all_tasks():
     tasks = Task.query.all()
     return jsonify([task.to_dict() for task in tasks])
 
 
 @task_bp.route('/tasks/<int:task_id>', methods=['GET'])
+@jwt_required()
 def get_task(task_id):
     task = Task.query.get_or_404(task_id)
     return jsonify(task.to_dict())
 
 
 @task_bp.route('/tasks/user/<int:user_id>', methods=['GET'])
+@jwt_required()
 def get_tasks_by_user(user_id):
     tasks = Task.query.filter_by(user_id=user_id).all()
     tasks = [task.to_dict() for task in tasks]
@@ -25,6 +29,7 @@ def get_tasks_by_user(user_id):
 
 
 @task_bp.route('/tasks', methods=['POST'])
+@jwt_required()
 def create_task():
     data = request.get_json()
     due_date = datetime.strptime(data['due_date'], '%d-%m-%Y')
@@ -37,6 +42,7 @@ def create_task():
 
 
 @task_bp.route('/tasks/<int:task_id>', methods=['PUT'])
+@jwt_required()
 def update_task(task_id):
     task = Task.query.get_or_404(task_id)
 
@@ -58,6 +64,7 @@ def update_task(task_id):
 
 
 @task_bp.route('/tasks/<int:task_id>', methods=['DELETE'])
+@jwt_required()
 def delete_task(task_id):
     task = Task.query.get_or_404(task_id)
 
