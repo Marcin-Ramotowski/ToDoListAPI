@@ -1,13 +1,17 @@
-version: '3.7'
-
 services:
-  web:
+  api:
     container_name: todo-api
     hostname: todo-api
     build: .
     env_file:
-      - src/.env
+      - api/.env
     ports:
       - "5000:5000"
-    volumes:
-      - ./src/test.db:/app/test.db
+    #volumes:
+      #- ./api/test.db:/app/test.db
+  db:
+    container_name: db
+    hostname: db
+    image: mysql:latest
+    env_file:
+      - db/.env
