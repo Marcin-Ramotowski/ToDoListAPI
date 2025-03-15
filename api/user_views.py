@@ -1,25 +1,24 @@
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request, abort, g
 from flask_jwt_extended import create_access_token, set_access_cookies, jwt_required, get_jwt_identity, unset_jwt_cookies
 from models import User, db
 from werkzeug.security import check_password_hash, generate_password_hash
 
 user_bp = Blueprint('user_bp', __name__)
 
-def admin_required():
-    current_user = User.query.filter_by(username=get_jwt_identity()).first()
-    if not current_user or current_user.role != 'admin':
-        abort(403, {'error': 'Access denied.'})
+def admin_required(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None or user.role != "Administrator":
+        abort(403, {'error': f'Access denied.'})
 
 @user_bp.route('/users', methods=['GET'])
 @jwt_required()
-@admin_required()
 def get_all_users():
+    admin_required(get_jwt_identity())
     users = User.query.all()
     return jsonify([user.to_dict() for user in users])
 
 @user_bp.route('/users/<int:user_id>', methods=['GET'])
 @jwt_required()
-@admin_required()
 def get_user(user_id):
     user = User.query.get_or_404(user_id)
     return jsonify(user.to_dict())
@@ -35,7 +34,6 @@ def create_user():
 @user_bp.route('/users/<int:user_id>', methods=['PUT'])
 @jwt_required()
 def edit_user(user_id):
-    current_user = User.query.filter_by(username=get_jwt_identity()).first()
     request_data = request.get_json()
     user_to_update = User.query.get_or_404(user_id)
     request_username = request_data.get('username')
