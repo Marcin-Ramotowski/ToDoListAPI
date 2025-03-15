@@ -5,14 +5,21 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 user_bp = Blueprint('user_bp', __name__)
 
+def admin_required():
+    current_user = User.query.filter_by(username=get_jwt_identity()).first()
+    if not current_user or current_user.role != 'admin':
+        abort(403, {'error': 'Access denied.'})
+
 @user_bp.route('/users', methods=['GET'])
 @jwt_required()
+@admin_required()
 def get_all_users():
     users = User.query.all()
     return jsonify([user.to_dict() for user in users])
 
 @user_bp.route('/users/<int:user_id>', methods=['GET'])
 @jwt_required()
+@admin_required()
 def get_user(user_id):
     user = User.query.get_or_404(user_id)
     return jsonify(user.to_dict())
@@ -28,6 +35,7 @@ def create_user():
 @user_bp.route('/users/<int:user_id>', methods=['PUT'])
 @jwt_required()
 def edit_user(user_id):
+    current_user = User.query.filter_by(username=get_jwt_identity()).first()
     request_data = request.get_json()
     user_to_update = User.query.get_or_404(user_id)
     request_username = request_data.get('username')
@@ -38,7 +46,7 @@ def edit_user(user_id):
         db.session.commit()
         return jsonify(user_to_update.to_dict())
     else:
-        return abort(400, {'error': 'Niepełne dane użytkownika.'})
+        return abort(400, {'error': 'Incomplete user data.'})
 
 @user_bp.route('/users/<int:user_id>', methods=['DELETE'])
 @jwt_required()
@@ -67,7 +75,7 @@ def user_login():
         set_access_cookies(response, access_token)
         return response
     else:
-        return jsonify({"msg": f"User {username} failed login"})
+        return jsonify({"msg": f"User {username} failed login."})
 
 @user_bp.route('/logout', methods=['GET'])
 @jwt_required()
