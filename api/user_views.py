@@ -5,23 +5,17 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 user_bp = Blueprint('user_bp', __name__)
 
-def admin_required(user_id):
+def admin_required(user_id, message='Access denied.'):
     user = User.query.get(user_id)
     if user is None or user.role != "Administrator":
-        abort(403, {'error': f'Access denied.'})
+        abort(403, {'error': message})
 
-def validate_access(owner_id):
+def validate_access(owner_id, message='Access denied.'):
     # Check if user try to access or edit resource that does not belong to them 
     logged_user_id = int(get_jwt_identity())
     logged_user_role = User.query.get(logged_user_id).role
     if logged_user_role != "Administrator" and logged_user_id != owner_id:
-        abort(403, {'error': f'Access denied.'})
-
-@user_bp.errorhandler(403)
-def forbidden_error(error):
-    response = jsonify(error.description)
-    response.status_code = 403
-    return response
+        abort(403, {'error': message})
 
 @user_bp.route('/users', methods=['GET'])
 @jwt_required()
