@@ -5,10 +5,10 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 user_bp = Blueprint('user_bp', __name__)
 
-def admin_required(username):
-    user = User.query.filter_by(username=username).first()
+def admin_required(user_id):
+    user = User.query.get(user_id)
     if user is None or user.role != "Administrator":
-        abort(403, {'error': f'Access denied.'})
+        return jsonify({'error': f'Access denied.'}), 403
 
 @user_bp.route('/users', methods=['GET'])
 @jwt_required()
@@ -20,6 +20,10 @@ def get_all_users():
 @user_bp.route('/users/<int:user_id>', methods=['GET'])
 @jwt_required()
 def get_user(user_id):
+    logged_user_id = int(get_jwt_identity())
+    logged_user_role = User.query.get(logged_user_id).role
+    if logged_user_role != "Administrator" and logged_user_id != user_id:
+        return jsonify({'error': f'Access denied.'}), 403
     user = User.query.get_or_404(user_id)
     return jsonify(user.to_dict())
 
@@ -65,20 +69,19 @@ def user_login():
     if user_from_db is not None:
         password_from_db = user_from_db.password
     else:
-        return jsonify({"msg": f"User {username} failed login"})
+        return jsonify({"msg": "User failed login"})
     
     if password_from_db and check_password_hash(password_hash, password_from_db):
-        access_token = create_access_token(identity=username)
-        response = jsonify({"msg": f"User {username} logged in successfully."})
+        access_token = create_access_token(identity=str(user_from_db.id))
+        response = jsonify({"msg": "User logged in successfully."})
         set_access_cookies(response, access_token)
         return response
     else:
-        return jsonify({"msg": f"User {username} failed login."})
+        return jsonify({"msg": "User failed login."})
 
 @user_bp.route('/logout', methods=['GET'])
 @jwt_required()
 def user_logout():
-    current_user = get_jwt_identity()
-    response = jsonify({"msg": f"User {current_user} logged out successfully."})
+    response = jsonify({"msg": "User logged out successfully."})
     unset_jwt_cookies(response)
     return response

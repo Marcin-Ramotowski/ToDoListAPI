@@ -11,7 +11,7 @@ class User(db.Model):
     password = db.Column(db.String(60), nullable=False)
 
     def to_dict(self):
-        return {"id": self.id, "username": self.username}
+        return {"id": self.id, "username": self.username, "email": self.email, "role": self.role}
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
