@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, abort, g
+from flask import Blueprint, jsonify, request, abort
 from flask_jwt_extended import create_access_token, set_access_cookies, jwt_required, get_jwt_identity, unset_jwt_cookies
 from models import User, db
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -49,6 +49,10 @@ def edit_user(user_id):
     user_to_update = User.query.get_or_404(user_id)
     request_username = request_data.get('username')
     request_email = request_data.get('email')
+    logged_user_id = int(get_jwt_identity())
+    logged_user_role = User.query.get(logged_user_id).role
+    if logged_user_role != "Administrator" and logged_user_id != user_id:
+        return jsonify({'error': f'You can not edit other user accounts.'}), 403
     if request_username and request_email:
         user_to_update.username = request_username
         user_to_update.email = request_email
@@ -62,6 +66,7 @@ def edit_user(user_id):
 def remove_user(user_id):
     logged_user_id = int(get_jwt_identity())
     logged_user_role = User.query.get(logged_user_id).role
+    # Only admin can remove other users accounts
     if logged_user_role != "Administrator" and logged_user_id != user_id:
         return jsonify({'error': f'You can not remove other user accounts.'}), 403
     user_to_delete = User.query.get_or_404(user_id)
