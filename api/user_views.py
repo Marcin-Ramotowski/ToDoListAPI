@@ -30,7 +30,14 @@ def get_user(user_id):
 @user_bp.route('/users', methods=['POST'])
 def create_user():
     data = request.get_json()
-    user = User(username=data['username'], email=data['email'], password=data['password'])
+    new_user_role = data['role']
+    # Only administrator can create admin accounts
+    if new_user_role == "Administrator":
+        logged_user_id = int(get_jwt_identity())
+        logged_user_role = User.query.get(logged_user_id).role
+        if logged_user_role != "Administrator":
+            return jsonify({'error': f'You can not create admin users.'}), 403
+    user = User(username=data['username'], email=data['email'], password=data['password'], role=new_user_role)
     db.session.add(user)
     db.session.commit()
     return jsonify(user.to_dict()), 201
