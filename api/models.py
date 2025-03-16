@@ -11,6 +11,9 @@ class User(db.Model):
 
     def to_dict(self):
         return {"id": self.id, "username": self.username, "email": self.email, "role": self.role}
+    
+    def get_editable_fields():
+        return {"username", "email", "role", "password"}
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

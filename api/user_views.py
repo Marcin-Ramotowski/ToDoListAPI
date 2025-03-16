@@ -40,21 +40,32 @@ def create_user():
     return jsonify(user.to_dict()), 201
 
 
-@user_bp.route('/users/<int:user_id>', methods=['PUT'])
+@user_bp.route('/users/<int:user_id>', methods=['PUT', 'PATCH'])
 @jwt_required()
 def edit_user(user_id):
-    request_data = request.get_json()
-    user_to_update = User.query.get_or_404(user_id)
-    request_username = request_data.get('username')
-    request_email = request_data.get('email')
     validate_access(user_id) # check if user tries to edit other user account
-    if request_username and request_email:
-        user_to_update.username = request_username
-        user_to_update.email = request_email
-        db.session.commit()
-        return jsonify(user_to_update.to_dict())
-    else:
-        return abort(400, {'error': 'Incomplete user data.'})
+    request_data = request.get_json()
+    if request_data.get('role') == 'Administrator':
+        admin_required(get_jwt_identity())
+
+    request_fields = set(request_data.keys())
+    editable_fields = User.get_editable_fields()
+    
+    # PUT requires all values
+    if request.method == 'PUT':
+        if request_fields != editable_fields:
+            return jsonify({'error': 'Invalid request data structure.'}), 400
+
+    user_to_update = User.query.get_or_404(user_id)
+    for field_name in request_fields:
+        requested_value = request_data.get(field_name)
+        if requested_value is None:
+            continue
+        new_value = generate_password_hash(requested_value) \
+            if field_name == 'password' else requested_value
+        setattr(user_to_update, field_name, new_value)
+    db.session.commit()
+    return jsonify(user_to_update.to_dict())
 
 
 @user_bp.route('/users/<int:user_id>', methods=['DELETE'])
