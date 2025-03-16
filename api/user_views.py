@@ -38,7 +38,8 @@ def create_user():
     # Only administrator can create admin accounts
     if new_user_role == "Administrator":
         admin_required(get_jwt_identity())
-    user = User(username=data['username'], email=data['email'], password=data['password'], role=new_user_role)
+    hashed_password = generate_password_hash(data['password'])
+    user = User(username=data['username'], email=data['email'], password=hashed_password, role=new_user_role)
     db.session.add(user)
     db.session.commit()
     return jsonify(user.to_dict()), 201
@@ -73,15 +74,14 @@ def user_login():
     request_data = request.get_json()
     username = request_data['username']
     password = request_data['password']
-    password_hash = generate_password_hash(password)
 
     user_from_db=User.query.filter(User.username == username).first()
     if user_from_db is not None:
-        password_from_db = user_from_db.password
+        password_hash = user_from_db.password
     else:
         return jsonify({"msg": "User failed login"})
     
-    if password_from_db and check_password_hash(password_hash, password_from_db):
+    if password_hash and check_password_hash(password_hash, password):
         access_token = create_access_token(identity=str(user_from_db.id))
         response = jsonify({"msg": "User logged in successfully."})
         set_access_cookies(response, access_token)
