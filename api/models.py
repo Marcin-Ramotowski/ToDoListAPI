@@ -1,18 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash
-import os
 
 db = SQLAlchemy()
-
-def init_db():
-    """Create default admin account if database is empty"""
-    with db.session.begin():
-        if not User.query.first():  # Check if user table is empty
-            admin_password = os.getenv("TODOLIST_ADMIN_PASSWORD", "admin")
-            hashed_password = generate_password_hash(admin_password)
-            admin = User(username='admin', email='admin@example.pl', password=hashed_password, role='Administrator')
-            db.session.add(admin)
-            db.session.commit()
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

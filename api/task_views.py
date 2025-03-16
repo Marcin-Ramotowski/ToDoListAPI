@@ -6,28 +6,9 @@ from user_views import admin_required, validate_access
 
 task_bp = Blueprint('task_bp', __name__)
 
-
-@task_bp.errorhandler(403)
-def forbidden_error(error):
-    response = jsonify(error.description)
-    response.status_code = 403
-    return response
-
-
-@task_bp.errorhandler(404)
-def not_found_error(error):
-    response = jsonify(error.description)
-    response.status_code = 404
-    return response
-
-
-def check_if_task_exists(task):
-    # Check if task exists or user has permissions to see it
-    if task is None:
-        abort(404, {'error': 'Task not found.'})
-    user_id = task.user_id
-    validate_access(user_id)
-
+# ============================================================
+# 🚀 1️⃣ API ENDPOINTS (ROUTES)
+# ============================================================
 
 @task_bp.route('/tasks', methods=['GET'])
 @jwt_required()
@@ -101,3 +82,33 @@ def delete_task(task_id):
     db.session.delete(task)
     db.session.commit()
     return jsonify({})
+
+
+# ============================================================
+# 🔧 2️⃣ UTILITIES
+# ============================================================
+
+def check_if_task_exists(task):
+    # Check if task exists or user has permissions to see it
+    if task is None:
+        abort(404, {'error': 'Task not found.'})
+    user_id = task.user_id
+    validate_access(user_id)
+
+
+# ============================================================
+# ❌ 3️⃣ ERROR HANDLERS
+# ============================================================
+
+@task_bp.errorhandler(403)
+def forbidden_error(error):
+    response = jsonify(error.description)
+    response.status_code = 403
+    return response
+
+
+@task_bp.errorhandler(404)
+def not_found_error(error):
+    response = jsonify(error.description)
+    response.status_code = 404
+    return response

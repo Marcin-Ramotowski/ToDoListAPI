@@ -1,10 +1,10 @@
+from dotenv import load_dotenv
 from flask import Flask
 from flask_jwt_extended import JWTManager
-from models import db, init_db
-from user_views import user_bp
-from task_views import task_bp
-from dotenv import load_dotenv
+from models import db
 import os
+from task_views import task_bp
+from user_views import user_bp, init_db
 
 if __name__ == "__main__":
     load_dotenv()
