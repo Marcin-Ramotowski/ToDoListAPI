@@ -7,7 +7,7 @@ from user_views import admin_required, validate_access
 task_bp = Blueprint('task_bp', __name__)
 
 # ============================================================
-# 🚀 1️⃣ API ENDPOINTS (ROUTES)
+# 🚀 1. API ENDPOINTS (ROUTES)
 # ============================================================
 
 @task_bp.route('/tasks', methods=['GET'])
@@ -85,7 +85,7 @@ def delete_task(task_id):
 
 
 # ============================================================
-# 🔧 2️⃣ UTILITIES
+# 🔧 2. UTILITIES
 # ============================================================
 
 def check_if_task_exists(task):
@@ -97,7 +97,7 @@ def check_if_task_exists(task):
 
 
 # ============================================================
-# ❌ 3️⃣ ERROR HANDLERS
+# ❌ 3. ERROR HANDLERS
 # ============================================================
 
 @task_bp.errorhandler(403)
