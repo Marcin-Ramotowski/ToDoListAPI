@@ -1,9 +1,15 @@
 from flask import Blueprint, jsonify, request, abort
-from flask_jwt_extended import create_access_token, set_access_cookies, jwt_required, get_jwt_identity, unset_jwt_cookies
+from flask_jwt_extended import create_access_token, set_access_cookies, jwt_required, verify_jwt_in_request, get_jwt_identity, unset_jwt_cookies
 from models import User, db
 from werkzeug.security import check_password_hash, generate_password_hash
 
 user_bp = Blueprint('user_bp', __name__)
+
+@user_bp.errorhandler(403)
+def forbidden_error(error):
+    response = jsonify(error.description)
+    response.status_code = 403
+    return response
 
 def admin_required(user_id, message='Access denied.'):
     user = User.query.get(user_id)
@@ -35,9 +41,9 @@ def get_user(user_id):
 def create_user():
     data = request.get_json()
     new_user_role = data['role']
-    # Only administrator can create admin accounts
     if new_user_role == "Administrator":
-        admin_required(get_jwt_identity())
+        verify_jwt_in_request()
+        admin_required(get_jwt_identity(), message="Access denied. Only administrators can create admin accounts.")
     hashed_password = generate_password_hash(data['password'])
     user = User(username=data['username'], email=data['email'], password=hashed_password, role=new_user_role)
     db.session.add(user)
