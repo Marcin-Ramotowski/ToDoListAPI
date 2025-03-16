@@ -12,7 +12,7 @@ class User(db.Model):
     def to_dict(self):
         return {"id": self.id, "username": self.username, "email": self.email, "role": self.role}
     
-    @classmethod
+    @staticmethod
     def get_editable_fields():
         return {"username", "email", "role", "password"}
 
@@ -33,6 +33,6 @@ class Task(db.Model):
             "done": self.done,
         }
     
-    @classmethod
+    @staticmethod
     def get_editable_fields():
         return {"title", "description", "due_date", "done"}
