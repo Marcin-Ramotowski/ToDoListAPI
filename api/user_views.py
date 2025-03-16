@@ -57,7 +57,7 @@ def edit_user(user_id):
             return jsonify({'error': 'Invalid request data structure.'}), 400
 
     user_to_update = User.query.get_or_404(user_id)
-    for field_name in request_fields:
+    for field_name in editable_fields:
         requested_value = request_data.get(field_name)
         if requested_value is None:
             continue

@@ -39,39 +39,39 @@ def get_tasks_by_user(user_id):
 @jwt_required()
 def create_task():
     data = request.get_json()
-    user_id = int(data.get('user_id'))
-    validate_access(user_id, 'Provided user_id is not assign to current user')
-    
     due_date = datetime.strptime(data['due_date'], '%d-%m-%Y')
     task = Task(title=data['title'], description=data['description'], due_date=due_date,
-                done=data['done'], user_id=data['user_id'])
+                done=data['done'], user_id=get_jwt_identity())
 
     db.session.add(task)
     db.session.commit()
     return jsonify(task.to_dict())
 
 
-@task_bp.route('/tasks/<int:task_id>', methods=['PUT'])
+@task_bp.route('/tasks/<int:task_id>', methods=['PUT', 'PATCH'])
 @jwt_required()
 def update_task(task_id):
     task = Task.query.get(task_id)
     check_if_task_exists(task)
 
-    request_title = request.json.get('title')
-    request_description = request.json.get('description')
-    request_due_date = datetime.strptime(request.json.get('due_date'), '%d-%m-%Y')
-    request_done = request.json.get('done')
+    request_data = request.get_json()
+    request_fields = set(request_data.keys())
+    editable_fields = Task.get_editable_fields()
 
-    if all((task.title, task.description, task.due_date)) and task.done is not None:
-        task.title = request_title
-        task.description = request_description
-        task.due_date = request_due_date
-        task.done = request_done
+    # PUT requires all values
+    if request.method == 'PUT':
+        if request_fields != editable_fields:
+            return jsonify({'error': 'Invalid request data structure.'}), 400
 
-        db.session.commit()
-        return jsonify(task.to_dict())
-    else:
-        return abort(400, {'error': 'Incomplete task data.'})
+    for field_name in editable_fields:
+        requested_value = request_data.get(field_name)
+        if requested_value is None:
+            continue
+        new_value = datetime.strptime(requested_value, '%d-%m-%Y') \
+            if field_name == 'due_date' else requested_value
+        setattr(task, field_name, new_value)
+    db.session.commit()
+    return jsonify(task.to_dict())
 
 
 @task_bp.route('/tasks/<int:task_id>', methods=['DELETE'])
