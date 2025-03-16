@@ -92,7 +92,7 @@ def user_login():
     
     if password_hash and check_password_hash(password_hash, password):
         access_token = create_access_token(identity=str(user_from_db.id))
-        response = jsonify({"msg": "User logged in successfully."})
+        response = jsonify({"msg": "User logged in successfully.", "user_id": user_from_db.id})
         set_access_cookies(response, access_token)
         return response
     else:
