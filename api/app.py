@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_jwt_extended import JWTManager
-from models import db
+from models import db, init_db
 from user_views import user_bp
 from task_views import task_bp
 from dotenv import load_dotenv
@@ -18,4 +18,5 @@ if __name__ == "__main__":
     jwt = JWTManager(app)
     with app.app_context():
         db.create_all()
+        init_db()
     app.run(debug=True, host='0.0.0.0')
