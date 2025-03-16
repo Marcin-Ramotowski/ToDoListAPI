@@ -11,7 +11,7 @@ if __name__ == "__main__":
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-    app.config['JWT_SECRET_KEY'] = 'changeme'
+    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'changeme')
     app.register_blueprint(user_bp)
     app.register_blueprint(task_bp)
     db.init_app(app)

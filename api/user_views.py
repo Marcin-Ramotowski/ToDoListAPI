@@ -129,9 +129,11 @@ def init_db():
     """Create default admin account if database is empty"""
     with db.session.begin():
         if not User.query.first():  # Check if user table is empty
+            admin_username = os.getenv("TODOLIST_ADMIN_USERNAME", "admin")
+            admin_email = os.getenv("TODOLIST_ADMIN_EMAIL", "admin@example.pl")
             admin_password = os.getenv("TODOLIST_ADMIN_PASSWORD", "admin")
             hashed_password = generate_password_hash(admin_password)
-            admin = User(username='admin', email='admin@example.pl', password=hashed_password, role='Administrator')
+            admin = User(username=admin_username, email=admin_email, password=hashed_password, role='Administrator')
             db.session.add(admin)
             db.session.commit()
 
