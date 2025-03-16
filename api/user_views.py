@@ -5,12 +5,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 user_bp = Blueprint('user_bp', __name__)
 
-@user_bp.errorhandler(403)
-def forbidden_error(error):
-    response = jsonify(error.description)
-    response.status_code = 403
-    return response
-
 def admin_required(user_id, message='Access denied.'):
     user = User.query.get(user_id)
     if user is None or user.role != "Administrator":
@@ -22,6 +16,12 @@ def validate_access(owner_id, message='Access denied.'):
     logged_user_role = User.query.get(logged_user_id).role
     if logged_user_role != "Administrator" and logged_user_id != owner_id:
         abort(403, {'error': message})
+
+@user_bp.errorhandler(403)
+def forbidden_error(error):
+    response = jsonify(error.description)
+    response.status_code = 403
+    return response
 
 @user_bp.route('/users', methods=['GET'])
 @jwt_required()
@@ -85,7 +85,7 @@ def user_login():
     if user_from_db is not None:
         password_hash = user_from_db.password
     else:
-        return jsonify({"msg": "User failed login"})
+        return jsonify({"msg": "User failed login"}), 401
     
     if password_hash and check_password_hash(password_hash, password):
         access_token = create_access_token(identity=str(user_from_db.id))
@@ -93,7 +93,7 @@ def user_login():
         set_access_cookies(response, access_token)
         return response
     else:
-        return jsonify({"msg": "User failed login."})
+        return jsonify({"msg": "User failed login."}), 401
 
 @user_bp.route('/logout', methods=['GET'])
 @jwt_required()
