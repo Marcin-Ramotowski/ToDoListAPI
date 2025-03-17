@@ -39,7 +39,7 @@ def get_tasks_by_user(user_id):
 @jwt_required()
 def create_task():
     data = request.get_json()
-    due_date = datetime.strptime(data['due_date'], '%d-%m-%Y')
+    due_date = datetime.strptime(data['due_date'], '%d-%m-%Y %H:%M')
     task = Task(title=data['title'], description=data['description'], due_date=due_date,
                 done=data['done'], user_id=get_jwt_identity())
 
@@ -67,7 +67,7 @@ def update_task(task_id):
         requested_value = request_data.get(field_name)
         if requested_value is None:
             continue
-        new_value = datetime.strptime(requested_value, '%d-%m-%Y') \
+        new_value = datetime.strptime(requested_value, '%d-%m-%Y %H:%M') \
             if field_name == 'due_date' else requested_value
         setattr(task, field_name, new_value)
     db.session.commit()
