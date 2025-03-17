@@ -54,7 +54,7 @@ def edit_user(user_id):
     # PUT requires all values
     if request.method == 'PUT':
         if request_fields != editable_fields:
-            return jsonify({'error': 'Invalid request data structure.'}), 400
+            abort(400, "Invalid request data structure.")
 
     user_to_update = User.query.get_or_404(user_id)
     for field_name in editable_fields:
@@ -88,7 +88,7 @@ def user_login():
     if user_from_db is not None:
         password_hash = user_from_db.password
     else:
-        return jsonify({"msg": "User failed login"}), 401
+        abort(401, "User failed login")
     
     if password_hash and check_password_hash(password_hash, password):
         access_token = create_access_token(identity=str(user_from_db.id))
@@ -96,7 +96,7 @@ def user_login():
         set_access_cookies(response, access_token)
         return response
     else:
-        return jsonify({"msg": "User failed login."}), 401
+        abort(401, "User failed login")
 
 
 @user_bp.route('/logout', methods=['GET'])
@@ -114,7 +114,7 @@ def user_logout():
 def admin_required(user_id, message='Access denied.'):
     user = User.query.get(user_id)
     if user is None or user.role != "Administrator":
-        abort(403, {'error': message})
+        abort(403, message)
 
 
 def validate_access(owner_id, message='Access denied.'):
@@ -122,7 +122,7 @@ def validate_access(owner_id, message='Access denied.'):
     logged_user_id = int(get_jwt_identity())
     logged_user_role = User.query.get(logged_user_id).role
     if logged_user_role != "Administrator" and logged_user_id != owner_id:
-        abort(403, {'error': message})
+        abort(403, message)
 
 
 def init_db():
@@ -136,14 +136,3 @@ def init_db():
             admin = User(username=admin_username, email=admin_email, password=hashed_password, role='Administrator')
             db.session.add(admin)
             db.session.commit()
-
-
-# ============================================================
-# ❌ 3. ERROR HANDLERS
-# ============================================================
-
-@user_bp.errorhandler(403)
-def forbidden_error(error):
-    response = jsonify(error.description)
-    response.status_code = 403
-    return response

@@ -1,7 +1,7 @@
+from datetime import datetime
 from flask import Blueprint, jsonify, request, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Task, db
-from datetime import datetime
 from user_views import admin_required, validate_access
 
 task_bp = Blueprint('task_bp', __name__)
@@ -39,6 +39,7 @@ def get_tasks_by_user(user_id):
 @jwt_required()
 def create_task():
     data = request.get_json()
+    validate_task_data(data)
     due_date = datetime.strptime(data['due_date'], '%d-%m-%Y %H:%M')
     task = Task(title=data['title'], description=data['description'], due_date=due_date,
                 done=data['done'], user_id=get_jwt_identity())
@@ -55,13 +56,14 @@ def update_task(task_id):
     check_if_task_exists(task)
 
     request_data = request.get_json()
+    validate_task_data(request_data)
     request_fields = set(request_data.keys())
     editable_fields = Task.get_editable_fields()
 
     # PUT requires all values
     if request.method == 'PUT':
         if request_fields != editable_fields:
-            return jsonify({'error': 'Invalid request data structure.'}), 400
+            abort(400, "Invalid request data structure.")
 
     for field_name in editable_fields:
         requested_value = request_data.get(field_name)
@@ -91,24 +93,17 @@ def delete_task(task_id):
 def check_if_task_exists(task):
     # Check if task exists or user has permissions to see it
     if task is None:
-        abort(404, {'error': 'Task not found.'})
+        abort(404, "Task not found.")
     user_id = task.user_id
     validate_access(user_id)
 
 
-# ============================================================
-# ❌ 3. ERROR HANDLERS
-# ============================================================
-
-@task_bp.errorhandler(403)
-def forbidden_error(error):
-    response = jsonify(error.description)
-    response.status_code = 403
-    return response
-
-
-@task_bp.errorhandler(404)
-def not_found_error(error):
-    response = jsonify(error.description)
-    response.status_code = 404
-    return response
+def validate_task_data(task):
+    due_date = task.get('due_date')
+    try:
+        datetime.strptime(due_date, '%d-%m-%Y %H:%M')
+    except ValueError:
+        abort(400, "Incorrect datetime format. Expected DD-MM-YYYY HH:MM")
+    done = task.get('done')
+    if done not in (0, 1):
+        abort(400, "Incorrect done field value. Expected 0 or 1")
