@@ -2,13 +2,11 @@ services:
   api:
     container_name: todo-api
     hostname: todo-api
+    depends_on:
+      - db
     build: .
     env_file:
       - api/.env
-    ports:
-      - "5000:5000"
-    #volumes:
-      #- ./api/test.db:/app/test.db
   db:
     container_name: db
     hostname: db
