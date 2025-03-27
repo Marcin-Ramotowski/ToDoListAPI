@@ -1,6 +1,7 @@
 import json
 from models import User, db
 from flask_jwt_extended import create_access_token
+from werkzeug.security import generate_password_hash
 
 def test_create_user(test_client):
     """New user registration test"""
@@ -14,17 +15,24 @@ def test_create_user(test_client):
     assert data["username"] == "testuser"
 
 def test_login(test_client):
-    """User login test with wrong password"""
-    user = User(username="testuser", email="test@example.com", password="hashed_pass", role="User")
+    """User login test"""
+    hashed_pass = generate_password_hash("testpass")
+    user = User(username="testuser", email="test@example.com", password=hashed_pass, role="User")
     db.session.add(user)
     db.session.commit()
 
     response = test_client.post(
         "/login",
-        data=json.dumps({"username": "testuser", "password": "testpass"}),
+        data=json.dumps({"username": "testuser", "password": "wrongpass"}),
         content_type="application/json",
     )
     assert response.status_code == 401 # User should not be logged - wrong password
+    response = test_client.post(
+        "/login",
+        data=json.dumps({"username": "testuser", "password": "testpass"}),
+        content_type="application/json",
+    )
+    assert response.status_code == 200 # User should be logged - right password
 
 def test_get_users(test_client):
     """Get all users test - JWT required"""
