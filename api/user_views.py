@@ -23,7 +23,9 @@ def get_all_users():
 @jwt_required()
 def get_user(user_id):
     validate_access(user_id) # check if user tries to read other user account details
-    user = User.query.get_or_404(user_id)
+    user = db.session.get(User, user_id)
+    if user is None:
+        abort(404, "User not found.")
     return jsonify(user.to_dict())
 
 
@@ -73,7 +75,9 @@ def edit_user(user_id):
 @jwt_required()
 def remove_user(user_id):
     validate_access(user_id) # Only admin can remove other users accounts
-    user_to_delete = User.query.get_or_404(user_id)
+    user_to_delete = db.session.get(User, user_id)
+    if user_to_delete is None:
+        abort(404, "User not found.")
     db.session.delete(user_to_delete)
     db.session.commit()
     return jsonify({"msg": "User removed successfully."})
@@ -117,7 +121,7 @@ def user_logout():
 # ============================================================
 
 def admin_required(user_id, message='Access denied.'):
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     if user is None or user.role != "Administrator":
         abort(403, message)
 
@@ -125,7 +129,7 @@ def admin_required(user_id, message='Access denied.'):
 def validate_access(owner_id, message='Access denied.'):
     # Check if user try to access or edit resource that does not belong to them 
     logged_user_id = int(get_jwt_identity())
-    logged_user_role = User.query.get(logged_user_id).role
+    logged_user_role = db.session.get(User, logged_user_id).role
     if logged_user_role != "Administrator" and logged_user_id != owner_id:
         abort(403, message)
 

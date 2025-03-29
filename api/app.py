@@ -35,7 +35,7 @@ def create_app(config_name="default"):
     # Function to check if JWT token is revoked
     @jwt.token_in_blocklist_loader
     def check_if_token_revoked(jwt_header, jwt_payload):
-        token = RevokedToken.query.get(jwt_payload["jti"])
+        token = db.session.get(RevokedToken, jwt_payload["jti"])
         return token is not None
 
     # Global error handler
