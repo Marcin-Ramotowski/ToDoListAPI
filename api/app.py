@@ -1,9 +1,8 @@
-from datetime import timedelta
 from dotenv import load_dotenv
 from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
 from jwt import ExpiredSignatureError
-from models import db, revoked_tokens
+from models import db, RevokedToken
 import os
 from task_views import task_bp
 from user_views import user_bp, init_db
@@ -36,7 +35,8 @@ def create_app(config_name="default"):
     # Function to check if JWT token is revoked
     @jwt.token_in_blocklist_loader
     def check_if_token_revoked(jwt_header, jwt_payload):
-        return jwt_payload["jti"] in revoked_tokens
+        token = RevokedToken.query.get(jwt_payload["jti"])
+        return token is not None
 
     # Global error handler
     @app.errorhandler(Exception)

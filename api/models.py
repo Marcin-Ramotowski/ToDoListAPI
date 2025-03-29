@@ -1,7 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
-revoked_tokens = set()
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -37,3 +36,6 @@ class Task(db.Model):
     @staticmethod
     def get_editable_fields():
         return {"title", "description", "due_date", "done"}
+
+class RevokedToken(db.Model):
+    jti = db.Column(db.String(100), primary_key=True)
