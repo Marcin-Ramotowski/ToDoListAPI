@@ -1,8 +1,9 @@
+from datetime import timedelta
 from dotenv import load_dotenv
 from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
 from jwt import ExpiredSignatureError
-from models import db
+from models import db, revoked_tokens
 import os
 from task_views import task_bp
 from user_views import user_bp, init_db
@@ -19,8 +20,9 @@ def create_app(config_name="default"):
         app.config["TESTING"] = True
     else:
         app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
-    
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+    # JWT settings
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "changeme")
 
     # Blueprints registration
@@ -30,6 +32,11 @@ def create_app(config_name="default"):
     # Database and JWT initialization
     db.init_app(app)
     jwt = JWTManager(app)
+
+    # Function to check if JWT token is revoked
+    @jwt.token_in_blocklist_loader
+    def check_if_token_revoked(jwt_header, jwt_payload):
+        return jwt_payload["jti"] in revoked_tokens
 
     # Global error handler
     @app.errorhandler(Exception)

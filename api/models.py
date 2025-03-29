@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
+revoked_tokens = set()
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
