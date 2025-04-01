@@ -35,6 +35,45 @@ def test_create_user(test_client):
     assert response.status_code == 201 # Logged administrators can create new admin users
 
 
+def test_remove_user(test_client):
+    "User remove test"
+    # Create 1 admin and 2 common user accounts
+    hashed_pass = generate_password_hash("adminpass")
+    admin = User(username="testadmin", email="testadmin@example.com", password=hashed_pass, role="Administrator")
+    db.session.add(admin)
+    db.session.commit()
+
+    hashed_pass = generate_password_hash("testpass")
+    user = User(username="testuser", email="test@example.com", password=hashed_pass, role="User")
+    db.session.add(user)
+    db.session.commit()
+
+    hashed_pass = generate_password_hash("testpass2")
+    user2 = User(username="testuser2", email="test2@example.com", password=hashed_pass, role="User")
+    db.session.add(user2)
+    db.session.commit()
+
+    # Anonymous try to remove user
+    response = test_client.delete(f"/users/{user.id}")
+    assert response.status_code == 401 # Anonymous cannot remove user account
+
+    # Logged user try to remove other user account
+    access_token = create_access_token(identity=str(user.id))
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = test_client.delete(f"/users/{admin.id}", headers=headers)
+    assert response.status_code == 403 # Common user cannot remove other user account
+
+    # Logged user try to remove own account
+    response = test_client.delete(f"/users/{user.id}", headers=headers)
+    assert response.status_code == 200 # Common user can remove your own account
+
+    # Logged admin can remove other user account
+    admin_access_token = create_access_token(identity=str(admin.id))
+    admin_headers = {"Authorization": f"Bearer {admin_access_token}"}
+    response = test_client.delete(f"/users/{user2.id}", headers=admin_headers)
+    assert response.status_code == 200 # Admin user can remove other user account
+
+
 def test_login(test_client):
     """User login test"""
     hashed_pass = generate_password_hash("testpass")
