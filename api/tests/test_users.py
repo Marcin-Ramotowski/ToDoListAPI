@@ -35,6 +35,49 @@ def test_create_user(test_client):
     assert response.status_code == 201 # Logged administrators can create new admin users
 
 
+def test_edit_user(test_client):
+    "User edit test"
+    # Create one admin and one user account
+    admin_password = "adminpass"
+    hashed_admin_pass = generate_password_hash(admin_password)
+    admin_data = {"username": "testadmin", "email": "testadmin@example.com", "role": "Administrator"}
+    admin = User(username=admin_data["username"], email=admin_data["email"], password=hashed_admin_pass, role=admin_data["role"])
+    db.session.add(admin)
+    db.session.commit()
+
+    user_password = "testpass"
+    hashed_user_pass = generate_password_hash(user_password)
+    user_data = {"username": "testuser", "email": "test@example.com", "role": "User"}
+    user = User(username=user_data["username"], email=user_data["email"], password=hashed_user_pass, role=user_data["role"])
+    db.session.add(user)
+    db.session.commit()
+
+    # Anonymous cannot edit any user
+    response = test_client.patch(f"/users/{admin.id}", data=json.dumps({"username": admin_data["username"], "password": admin_password}))
+    assert response.status_code == 401
+
+    # Login users
+    admin_access_token = create_access_token(identity=str(admin.id))
+    admin_headers = {"Authorization": f"Bearer {admin_access_token}", "Content-Type": "application/json"}
+    user_access_token = create_access_token(identity=str(user.id))
+    user_headers = {"Authorization": f"Bearer {user_access_token}", "Content-Type": "application/json"}
+
+    # Check if PUT request contains all editable fields
+    response = test_client.put(f"/users/{user.id}", data=json.dumps({"username": user_data["username"], "password": user_password}), headers=user_headers)
+    assert response.status_code == 400 # PUT must have all editable fields
+
+    # Check if user can edit your own data
+    response = test_client.patch(f"/users/{user.id}", data=json.dumps({"username": user_data["username"], "password": user_password}), headers=user_headers)
+    assert response.status_code == 200
+
+    # Check if user cannot edit other user data
+    response = test_client.patch(f"/users/{admin.id}", data=json.dumps({"username": admin_data["username"], "password": admin_password}), headers=user_headers)
+    assert response.status_code == 403
+
+    # Check if admin can edit other user data
+    response = test_client.patch(f"/users/{user.id}", data=json.dumps({"username": user_data["username"], "password": user_password}), headers=admin_headers)
+    assert response.status_code == 200
+
 def test_remove_user(test_client):
     "User remove test"
     # Create 1 admin and 2 common user accounts
