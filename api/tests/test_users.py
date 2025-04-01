@@ -30,22 +30,15 @@ def test_create_user(test_client, test_user, test_admin):
     response = test_client.post("/users", data=json.dumps(admin_user_data), content_type="application/json", headers=headers)
     assert response.status_code == 201 # Logged administrators can create new admin users
 
-def test_edit_user(test_client, test_user):
+def test_edit_user(test_client, test_user, test_admin):
     "User edit test"
-    # Create one admin account
-    admin_password = "adminpass"
-    hashed_admin_pass = generate_password_hash(admin_password)
-    admin_data = {"username": "testadmin", "email": "testadmin@example.com", "role": "Administrator"}
-    admin = User(username=admin_data["username"], email=admin_data["email"], password=hashed_admin_pass, role=admin_data["role"])
-    db.session.add(admin)
-    db.session.commit()
-
     # Anonymous cannot edit any user
-    response = test_client.patch(f"/users/{admin.id}", data=json.dumps({"username": admin_data["username"], "password": admin_password}))
+    admin_data = test_admin.to_dict()
+    response = test_client.patch(f"/users/{test_admin.id}", data=json.dumps({"username": admin_data["username"], "password": "adminpass"}))
     assert response.status_code == 401
 
     # Login users
-    admin_access_token = create_access_token(identity=str(admin.id))
+    admin_access_token = create_access_token(identity=str(test_admin.id))
     admin_headers = {"Authorization": f"Bearer {admin_access_token}", "Content-Type": "application/json"}
     user_access_token = create_access_token(identity=str(test_user.id))
     user_headers = {"Authorization": f"Bearer {user_access_token}", "Content-Type": "application/json"}
@@ -59,7 +52,7 @@ def test_edit_user(test_client, test_user):
     assert response.status_code == 200
 
     # Check if user cannot edit other user data
-    response = test_client.patch(f"/users/{admin.id}", data=json.dumps({"username": admin_data["username"], "password": admin_password}), headers=user_headers)
+    response = test_client.patch(f"/users/{test_admin.id}", data=json.dumps({"username": admin_data["username"], "password": "adminpass"}), headers=user_headers)
     assert response.status_code == 403
 
     # Check if admin can edit other user data
