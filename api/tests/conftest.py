@@ -1,6 +1,7 @@
 import pytest
 from app import create_app
 from datetime import datetime
+from flask_jwt_extended import create_access_token
 from models import db, User, Task
 from werkzeug.security import generate_password_hash
 
@@ -48,3 +49,9 @@ def new_task(test_user):
     db.session.add(task)
     db.session.commit()
     return task
+
+def login_test_user(identity):
+    """Return Bearer auth header for user identified by provided id"""
+    access_token = create_access_token(identity=str(identity))
+    auth_header = {"Authorization": f"Bearer {access_token}"}
+    return auth_header
