@@ -59,7 +59,9 @@ def edit_user(user_id):
         if request_fields != editable_fields:
             abort(400, "Invalid request data structure.")
 
-    user_to_update = User.query.get_or_404(user_id)
+    user_to_update = db.session.get(User, user_id)
+    if user_to_update is None:
+        abort(404, "User not found.")
     for field_name in editable_fields:
         requested_value = request_data.get(field_name)
         if requested_value is None:
