@@ -1,6 +1,4 @@
-from datetime import datetime
 import json
-from models import db
 from flask_jwt_extended import create_access_token
 
 def test_create_task(test_client, test_user):
@@ -14,9 +12,9 @@ def test_create_task(test_client, test_user):
         headers=headers,
         content_type="application/json",
     )
-    assert response.status_code == 200  # Create task should be successful
+    assert response.status_code == 200, "Logged user should can create task"
     data = response.get_json()
-    assert data["title"] == "Test Task"
+    assert data["title"] == "Test Task", "API should return created task data"
 
 def test_get_tasks(test_client, test_user, new_task):
     """User task get test"""
@@ -24,7 +22,7 @@ def test_get_tasks(test_client, test_user, new_task):
     headers = {"Authorization": f"Bearer {access_token}"}
 
     response = test_client.get(f"/tasks/user/{test_user.id}", headers=headers)
-    assert response.status_code == 200
+    assert response.status_code == 200, "Logged user should can get your own tasks data"
     data = response.get_json()
     assert len(data) == 1
-    assert data[0]["title"] == "Test Task"
+    assert data[0]["title"] == "Test Task", "API should return only tasks belongs to specific user"
