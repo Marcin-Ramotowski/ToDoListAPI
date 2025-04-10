@@ -62,6 +62,7 @@ def create_app(config_name="default"):
 
 # Server start only if we run app directly
 if __name__ == "__main__":
+    from waitress import serve
     app = create_app()
     port = os.getenv("TODOLIST_PORT", "80")
-    app.run(host="0.0.0.0", port=port)
+    serve(app, host="0.0.0.0", port=port)
