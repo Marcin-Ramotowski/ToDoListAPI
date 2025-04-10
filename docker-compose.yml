@@ -5,11 +5,17 @@ services:
     depends_on:
       - db
     build: .
-    env_file:
-      - api/.env
+    networks:
+      - default
+
   db:
     container_name: db
     hostname: db
     image: mysql:latest
-    env_file:
-      - db/.env
+    networks:
+      - default
+
+networks:
+  default:
+    name: todolist
+    driver: bridge

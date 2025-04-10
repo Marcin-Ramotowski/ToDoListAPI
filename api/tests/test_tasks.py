@@ -1,15 +1,9 @@
-from datetime import datetime
 import json
-from models import Task, User, db
 from flask_jwt_extended import create_access_token
 
-def test_create_task(test_client):
+def test_create_task(test_client, test_user):
     """Task creation test by logged in user"""
-    user = User(username="testuser", email="test@example.com", password="hashed_pass", role="User")
-    db.session.add(user)
-    db.session.commit()
-
-    access_token = create_access_token(identity=str(user.id))
+    access_token = create_access_token(identity=str(test_user.id))
     headers = {"Authorization": f"Bearer {access_token}"}
 
     response = test_client.post(
@@ -18,25 +12,17 @@ def test_create_task(test_client):
         headers=headers,
         content_type="application/json",
     )
-    assert response.status_code == 200  # Create task should be successful
+    assert response.status_code == 200, "Logged user should can create task"
     data = response.get_json()
-    assert data["title"] == "Test Task"
+    assert data["title"] == "Test Task", "API should return created task data"
 
-def test_get_tasks(test_client):
+def test_get_tasks(test_client, test_user, new_task):
     """User task get test"""
-    user = User(username="taskuser", email="task@example.com", password="hashed_pass", role="User")
-    db.session.add(user)
-    db.session.commit()
-
-    task = Task(title="Zadanie", description="Opis zadania", due_date=datetime.strptime("20-03-2025 12:00", '%d-%m-%Y %H:%M'), done=0, user_id=user.id)
-    db.session.add(task)
-    db.session.commit()
-
-    access_token = create_access_token(identity=str(user.id))
+    access_token = create_access_token(identity=str(test_user.id))
     headers = {"Authorization": f"Bearer {access_token}"}
 
-    response = test_client.get(f"/tasks/user/{user.id}", headers=headers)
-    assert response.status_code == 200
+    response = test_client.get(f"/tasks/user/{test_user.id}", headers=headers)
+    assert response.status_code == 200, "Logged user should can get your own tasks data"
     data = response.get_json()
     assert len(data) == 1
-    assert data[0]["title"] == "Zadanie"
+    assert data[0]["title"] == "Test Task", "API should return only tasks belongs to specific user"

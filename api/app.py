@@ -12,7 +12,7 @@ def create_app(config_name="default"):
     """Creates and returns a new instance of Flask app."""
     load_dotenv()
     app = Flask(__name__)
-    
+
     # Database settings
     if config_name == "testing":
         app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"  # Database in memory
@@ -63,4 +63,5 @@ def create_app(config_name="default"):
 # Server start only if we run app directly
 if __name__ == "__main__":
     app = create_app()
-    app.run(host="0.0.0.0")
+    port = os.getenv("TODOLIST_PORT", "80")
+    app.run(host="0.0.0.0", port=port)

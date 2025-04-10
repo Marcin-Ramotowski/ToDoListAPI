@@ -1,5 +1,6 @@
-FROM python:3.11.7-slim-bookworm
+FROM python:3.11.7-alpine
 WORKDIR /app
 COPY api .
 RUN pip install -r requirements.txt
-CMD python3 app.py
+EXPOSE 80
+CMD ["python3", "app.py"]
