@@ -52,7 +52,7 @@ const Profile = () => {
       <h1 className="text-2xl font-bold mb-6">👤 Twój profil</h1>
 
       <div className="mb-4">
-        <label className="block font-semibold mb-1">Nazwa użytkownika:</label>
+        <label className="block font-semibold mb-1"><strong>Nazwa użytkownika:</strong></label>
         {editMode ? (
           <input
             type="text"
@@ -66,7 +66,7 @@ const Profile = () => {
       </div>
 
       <div className="mb-4">
-        <label className="block font-semibold mb-1">Email:</label>
+        <label className="block font-semibold mb-1"><strong>Email:</strong></label>
         {editMode ? (
           <input
             type="email"
@@ -80,7 +80,7 @@ const Profile = () => {
       </div>
 
       <div className="mb-6">
-        <label className="block font-semibold mb-1">Rola:</label>
+        <label className="block font-semibold mb-1"><strong>Rola:</strong></label>
         <p>{user.role}</p>
       </div>
 
@@ -103,27 +103,25 @@ const Profile = () => {
           </button>
         </div>
       ) : (
+        <div className="flex flex-col gap-2">
         <button
           onClick={() => setEditMode(true)}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
           ✏️ Edytuj profil
+        </button>          
+        <button
+          onClick={() => navigate("/profile/change-password")}
+          className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+        >
+          🔒 Zmień hasło
         </button>
-      )}
-      {!editMode && (
-        <div className="mt-6 flex flex-col gap-2">
-          <button
-            onClick={() => navigate("/profile/change-password")}
-            className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
-          >
-            🔒 Zmień hasło
-          </button>
-          <button
-            onClick={() => navigate("/profile/delete")}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-          >
-            ❌ Usuń konto
-          </button>
+        <button
+          onClick={() => navigate("/profile/delete")}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        >
+          ❌ Usuń konto
+        </button>
         </div>
       )}
     </div>
