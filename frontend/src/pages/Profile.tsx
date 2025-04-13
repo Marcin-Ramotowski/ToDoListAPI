@@ -57,7 +57,7 @@ const Profile = () => {
 
       <div className="flex flex-col gap-2">
         <button
-          onClick={() => navigate(`/profile/${user.id}/change-password`)}
+          onClick={() => navigate("/profile/change-password")}
           className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
         >
           🔐 Zmień hasło
