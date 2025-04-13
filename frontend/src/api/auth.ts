@@ -1,22 +1,24 @@
-import axios from "axios";
 import Cookies from "js-cookie";
+import api from "./api";
 
-const API_URL = "http://localhost:5000";
-
-export const logout = async () => {
+// User login
+export const login = async (username: string, password: string) => {
   try {
-    await axios.get(`${API_URL}/logout`, { withCredentials: true });
-  } catch (error) {
-    console.error("Error during logout:", error);
-  }
+    const response = await api.post("/login", { username, password });
 
-  // Remove JWT token from cookies
-  document.cookie = "access_token_cookie=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-  localStorage.removeItem("user_id");
+    const userId = response.data.user_id;
+
+    Cookies.set("user_id", String(userId), { secure: true, sameSite: "Strict" });
+
+    return { userId };
+  } catch (error) {
+    throw new Error("Incorrect username or password.");
+  }
 };
 
-export const getCsrfToken = () => {
-  const value = Cookies.get("csrf_access_token");
-  const header = {"X-CSRF-TOKEN": value}
-  return header;
+// Logout
+export const logout = async () => {
+  await api.get("/logout"); // API removes JWT
+  Cookies.remove("access_token_cookie");
+  Cookies.remove("user_id");
 };

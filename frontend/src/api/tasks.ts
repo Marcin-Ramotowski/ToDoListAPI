@@ -1,11 +1,8 @@
-import axios from "axios";
-import { getCsrfToken } from "./auth";
-
-const API_URL = "http://localhost:5000";
+import api from "./api"
 
 // Get user tasks
 export const getUserTasks = async (userId: number) => {
-  const response = await axios.get(`${API_URL}/tasks/user/${userId}`, {withCredentials: true, headers: getCsrfToken()});
+  const response = await api.get(`/tasks/user/${userId}`);
   return response.data;
 };
 
@@ -16,11 +13,11 @@ export const createTask = async (taskData: {
   due_date: string;
   done: boolean;
 }) => {
-  const response = await axios.post(`${API_URL}/tasks`, taskData, {withCredentials: true, headers: getCsrfToken()});
+  const response = await api.post("/tasks", taskData);
   return response.data;
 };
 
 // Delete task
 export const deleteTask = async (taskId: number) => {
-  await axios.delete(`${API_URL}/tasks/${taskId}`, {withCredentials: true, headers: getCsrfToken()});
+  await api.delete(`/tasks/${taskId}`)
 };
