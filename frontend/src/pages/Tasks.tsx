@@ -4,6 +4,7 @@ import { getUserTasks, createTask, deleteTask } from "../api/tasks";
 import { logout } from "../api/auth";
 import api from "../api/api";
 import Cookies from "js-cookie";
+import { User } from "lucide-react";
 
 // Define Task type
 interface Task {
@@ -82,9 +83,14 @@ const Tasks = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 relative min-h-screen">
+      <button 
+        onClick={() => navigate(`/profile`)} 
+        className="text-gray-600 hover:text-black mb-4 flex items-center">
+        <User className="w-5 h-5 mr-1" />
+        Profil
+      </button>
       <h1 className="text-2xl font-bold mb-4">Twoje zadania</h1>
-
       <button 
         onClick={handleLogout} 
         className="bg-red-500 text-white p-2 rounded hover:bg-red-600 mb-4"
