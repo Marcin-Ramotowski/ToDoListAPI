@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUserTasks, createTask, deleteTask } from "../api/tasks";
 import { logout } from "../api/auth";
+import api from "../api/api";
 import Cookies from "js-cookie";
 
 // Define Task type
@@ -30,7 +31,7 @@ const Tasks = () => {
         const tasksData = await getUserTasks(userId);
         setTasks(tasksData);
       } catch (error) {
-        console.error("Błąd pobierania zadań:", error);
+        console.error("Error during tasks fetching:", error);
       }
     };
 
@@ -48,7 +49,7 @@ const Tasks = () => {
       setTasks([...tasks, task]); // List update
       setNewTask({ title: "", description: "", due_date: "", done: false }); // Form reset
     } catch (error) {
-      console.error("Błąd tworzenia zadania:", error);
+      console.error("Error during task creation:", error);
     }
   };
 
@@ -57,7 +58,26 @@ const Tasks = () => {
       await deleteTask(taskId);
       setTasks(tasks.filter((task) => task.id !== taskId));
     } catch (error) {
-      console.error("Błąd usuwania zadania:", error);
+      console.error("Error during task deletion:", error);
+    }
+  };
+
+  // Change task status
+  const handleToggleTaskStatus = async (taskId: number) => {
+    try {
+      const updatedTasks = tasks.map(task => {
+        if (task.id === taskId) {
+          const newStatus = !task.done;
+          // Send PATCH request to backend
+          api.patch(`/tasks/${task.id}`, { done: newStatus });
+          // Change local state
+          return { ...task, done: newStatus };
+        }
+        return task;
+      });
+      setTasks(updatedTasks); // refresh UI
+    } catch (err) {
+      console.error("Error during task update:", err);
     }
   };
 
@@ -108,7 +128,9 @@ const Tasks = () => {
                 <h2 className="font-semibold">{task.title}</h2>
                 <p>{task.description}</p>
                 <p><strong>Termin:</strong> {task.due_date}</p>
-                <p><strong>Status:</strong> {task.done ? "✅ Zrobione" : "⏳ Do zrobienia"}</p>
+                <p><strong>Status:</strong> {task.done ? "✅ Zrobione" : "⏳ Do zrobienia"} 
+                <input type="checkbox" checked={task.done} onChange={() => handleToggleTaskStatus(task.id)}/>
+                </p>
               </div>
               <button 
                 onClick={() => handleDeleteTask(task.id)} 
