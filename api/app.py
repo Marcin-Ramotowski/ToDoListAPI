@@ -13,7 +13,7 @@ def create_app(config_name="default"):
     """Creates and returns a new instance of Flask app."""
     load_dotenv()
     app = Flask(__name__)
-    CORS(app, supports_credentials=True, origins=os.getenv("CORS_ALLOWED_ORIGINS", "").split(","))
+    CORS(app, supports_credentials=True, origins=os.getenv("FRONTEND_ORIGIN", "").split(","))
 
     # Database settings
     if config_name == "testing":
