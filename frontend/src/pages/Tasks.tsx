@@ -18,6 +18,8 @@ interface Task {
 const Tasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState({ title: "", description: "", due_date: "", done: false });
+  const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
+  const [editedTask, setEditedTask] = useState<Partial<Task>>({});  
   const navigate = useNavigate();
   const userId = Number(Cookies.get("user_id"))
 
@@ -82,6 +84,31 @@ const Tasks = () => {
     }
   };
 
+  const handleEditTask = (task: Task) => {
+    setEditingTaskId(task.id);
+    setEditedTask({
+      title: task.title,
+      description: task.description,
+      due_date: task.due_date
+    });
+  };
+  
+  const handleCancelEdit = () => {
+    setEditingTaskId(null);
+    setEditedTask({});
+  };
+  
+  const handleSaveEdit = async (taskId: number) => {
+    try {
+      const response = await api.patch(`/tasks/${taskId}`, editedTask);
+      setTasks(tasks.map((t) => (t.id === taskId ? response.data : t)));
+      setEditingTaskId(null);
+      setEditedTask({});
+    } catch (error) {
+      console.error("Błąd podczas edycji zadania:", error);
+    }
+  };
+
   return (
     <div className="p-6 relative min-h-screen">
       <button 
@@ -129,21 +156,76 @@ const Tasks = () => {
       ) : (
         <ul>
           {tasks.map((task) => (
-            <li key={task.id} className="border p-2 rounded mb-2 flex justify-between items-center">
-              <div>
-                <h2 className="font-semibold">{task.title}</h2>
-                <p>{task.description}</p>
-                <p><strong>Termin:</strong> {task.due_date}</p>
-                <p><strong>Status:</strong> {task.done ? "✅ Zrobione" : "⏳ Do zrobienia"} 
-                <input type="checkbox" checked={task.done} onChange={() => handleToggleTaskStatus(task.id)}/>
-                </p>
+            <li key={task.id} className="border p-2 rounded mb-2 flex justify-between items-start gap-2">
+              <div className="flex-1">
+                {editingTaskId === task.id ? (
+                  <>
+                    <input
+                      type="text"
+                      value={editedTask.title || ""}
+                      onChange={(e) => setEditedTask({ ...editedTask, title: e.target.value })}
+                      className="border p-1 mb-1 w-full"
+                    />
+                    <textarea
+                      value={editedTask.description || ""}
+                      onChange={(e) => setEditedTask({ ...editedTask, description: e.target.value })}
+                      className="border p-1 mb-1 w-full"
+                    />
+                    <input
+                      type="text"
+                      value={editedTask.due_date || ""}
+                      onChange={(e) => setEditedTask({ ...editedTask, due_date: e.target.value })}
+                      className="border p-1 mb-1 w-full"
+                    />
+                    <div className="flex gap-2 mt-1">
+                      <button
+                        onClick={() => handleSaveEdit(task.id)}
+                        className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+                      >
+                        💾 Zapisz
+                      </button>
+                      <button
+                        onClick={handleCancelEdit}
+                        className="bg-gray-400 text-white px-2 py-1 rounded hover:bg-gray-500"
+                      >
+                        ❌ Anuluj
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <h2 className="font-semibold">{task.title}</h2>
+                    <p>{task.description}</p>
+                    <p><strong>Termin:</strong> {task.due_date}</p>
+                    <p>
+                      <strong>Status:</strong> {task.done ? "✅ Zrobione" : "⏳ Do zrobienia"}
+                      <input
+                        type="checkbox"
+                        checked={task.done}
+                        onChange={() => handleToggleTaskStatus(task.id)}
+                        className="ml-2"
+                      />
+                    </p>
+                  </>
+                )}
               </div>
-              <button 
-                onClick={() => handleDeleteTask(task.id)} 
-                className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
-              >
-                ❌ Usuń
-              </button>
+
+              <div className="flex flex-col gap-2">
+                {editingTaskId !== task.id && (
+                  <button
+                    onClick={() => handleEditTask(task)}
+                    className="bg-yellow-400 text-white px-2 py-1 rounded hover:bg-yellow-500"
+                  >
+                    ✏️ Edytuj
+                  </button>
+                )}
+                <button
+                  onClick={() => handleDeleteTask(task.id)}
+                  className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                >
+                  ❌ Usuń
+                </button>
+              </div>
             </li>
           ))}
         </ul>
