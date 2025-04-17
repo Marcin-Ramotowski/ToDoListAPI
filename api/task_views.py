@@ -100,10 +100,11 @@ def check_if_task_exists(task):
 
 def validate_task_data(task):
     due_date = task.get('due_date')
-    try:
-        datetime.strptime(due_date, '%d-%m-%Y %H:%M')
-    except ValueError:
-        abort(400, "Incorrect datetime format. Expected DD-MM-YYYY HH:MM")
+    if due_date:
+        try:
+            datetime.strptime(due_date, '%d-%m-%Y %H:%M')
+        except ValueError:
+            abort(400, "Incorrect datetime format. Expected DD-MM-YYYY HH:MM")
     done = task.get('done')
     if done not in (0, 1):
         abort(400, "Incorrect done field value. Expected 0 or 1")

@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 from flask import Flask, jsonify
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from jwt import ExpiredSignatureError
 from models import db, RevokedToken
@@ -12,6 +13,7 @@ def create_app(config_name="default"):
     """Creates and returns a new instance of Flask app."""
     load_dotenv()
     app = Flask(__name__)
+    CORS(app, supports_credentials=True, origins=os.getenv("FRONTEND_ORIGIN", "").split(","))
 
     # Database settings
     if config_name == "testing":
@@ -23,6 +25,7 @@ def create_app(config_name="default"):
 
     # JWT settings
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "changeme")
+    app.config["JWT_TOKEN_LOCATION"] = ["cookies", "headers"]
 
     # Blueprints registration
     app.register_blueprint(user_bp)
