@@ -1,17 +1,43 @@
 services:
+  frontend:
+    container_name: frontend
+    hostname: frontend
+    restart: unless-stopped
+    depends_on:
+      - api
+    build:
+      context: frontend
+      dockerfile: frontend.dockerfile
+    networks:
+      - default
+    ports:
+      - 5173:80
+
   api:
     container_name: todo-api
     hostname: todo-api
+    restart: unless-stopped
     depends_on:
       - db
-    build: .
+    build:
+      context: api
+      dockerfile: api.dockerfile
+    #environment:
+      #- SQLALCHEMY_DATABASE_URI=
+      #- FRONTEND_ORIGIN=
     networks:
       - default
+    ports:
+      - 5000:80
 
   db:
     container_name: db
     hostname: db
     image: mysql:latest
+    #environment:
+      #- MYSQL_USER=
+      #- MYSQL_PASSWORD=
+      #- MYSQL_DATABASE=
     networks:
       - default
 
