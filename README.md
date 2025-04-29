@@ -107,6 +107,10 @@ Poniżej lista zmiennych środowiskowych dla backendu:
 | `TODOLIST_ADMIN_PASSWORD` | ❌        | Hasło domyślnego administratora aplikacji (zalecane). |
 | `FRONTEND_ORIGIN`         | ✅        | Adres URL frontendu (np. `http://localhost:5173`) do ustawienia CORS/cookies (wymagany do połączenia frontendu z API, można podać więcej adresów rozdzielając je przecinkiem)                     |
 
+Poniżej lista zmiennych środowiskowych dla frontendu:
+| Nazwa                     | Wymagana | Opis                                                                                             |
+| ------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
+| `VITE_API_URL`            | ✅       | Adres URL backendu, z którym komunikuje się frontend. Ustawiany w pliku `frontend/frontend.dockerfile` przed zbudowaniem kontenera. |
 ---
 
 ## 📅 Dalsze kroki
