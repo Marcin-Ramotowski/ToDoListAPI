@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN VITE_API_URL="http://localhost:5000" npm run build
+RUN VITE_API_URL=/api npm run build
 
 # Etap 2: Nginx
 FROM nginx:alpine
