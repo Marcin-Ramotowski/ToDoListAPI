@@ -100,7 +100,24 @@ const Tasks = () => {
   
   const handleSaveEdit = async (taskId: number) => {
     try {
-      const response = await api.patch(`/tasks/${taskId}`, editedTask);
+      const formatDateForApi = (dateStr: string): string => {
+        const date = new Date(dateStr);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${day}-${month}-${year} ${hours}:${minutes}`;
+      };
+  
+      const payload = {
+        ...editedTask,
+        due_date: editedTask.due_date
+          ? formatDateForApi(editedTask.due_date)
+          : undefined,
+      };
+  
+      const response = await api.patch(`/tasks/${taskId}`, payload);
       setTasks(tasks.map((t) => (t.id === taskId ? response.data : t)));
       setEditingTaskId(null);
       setEditedTask({});

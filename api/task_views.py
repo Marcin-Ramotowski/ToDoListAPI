@@ -106,5 +106,5 @@ def validate_task_data(task):
         except ValueError:
             abort(400, "Incorrect datetime format. Expected DD-MM-YYYY HH:MM")
     done = task.get('done')
-    if done not in (0, 1):
+    if done is not None and done not in (0, 1):
         abort(400, "Incorrect done field value. Expected 0 or 1")
