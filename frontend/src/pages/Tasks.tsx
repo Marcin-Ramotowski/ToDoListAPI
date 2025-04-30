@@ -15,6 +15,13 @@ interface Task {
   done: boolean;
 }
 
+const formatDateForApi = (dateStr: string): string => {
+  const [datePart, timePart] = dateStr.split('T');
+  const [year, month, day] = datePart.split('-');
+  const [hours, minutes] = timePart.split(':');
+  return `${day}-${month}-${year} ${hours}:${minutes}`;
+}
+
 const Tasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState({ title: "", description: "", due_date: "", done: false });
@@ -48,7 +55,13 @@ const Tasks = () => {
 
   const handleCreateTask = async () => {
     try {
-      const task = await createTask(newTask);
+      const payload = {
+        ...newTask,
+        due_date: newTask.due_date
+          ? formatDateForApi(newTask.due_date)
+          : "",
+      };
+      const task = await createTask(payload);
       setTasks([...tasks, task]); // List update
       setNewTask({ title: "", description: "", due_date: "", done: false }); // Form reset
     } catch (error) {
@@ -100,13 +113,6 @@ const Tasks = () => {
   
   const handleSaveEdit = async (taskId: number) => {
     try {
-      const formatDateForApi = (dateStr: string): string => {
-        const [datePart, timePart] = dateStr.split('T');
-        const [year, month, day] = datePart.split('-');
-        const [hours, minutes] = timePart.split(':');
-        return `${day}-${month}-${year} ${hours}:${minutes}`;
-      };
-  
       const payload = {
         ...editedTask,
         due_date: editedTask.due_date
@@ -152,7 +158,7 @@ const Tasks = () => {
           className="border p-2 mr-2"
         />
         <input 
-          type="text" placeholder="Termin (DD-MM-YYYY HH:MM)" value={newTask.due_date} 
+          type="datetime-local" placeholder="Termin" value={newTask.due_date} 
           onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })} 
           className="border p-2 mr-2"
         />
