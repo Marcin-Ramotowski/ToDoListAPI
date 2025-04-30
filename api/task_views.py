@@ -40,7 +40,7 @@ def get_tasks_by_user(user_id):
 def create_task():
     data = request.get_json()
     validate_task_data(data)
-    due_date = datetime.strptime(data['due_date'], '%d-%m-%Y %H:%M')
+    due_date = datetime.strptime(data['due_date'], '%Y-%m-%dT%H:%M')
     task = Task(title=data['title'], description=data['description'], due_date=due_date,
                 done=data['done'], user_id=get_jwt_identity())
 
@@ -69,7 +69,7 @@ def update_task(task_id):
         requested_value = request_data.get(field_name)
         if requested_value is None:
             continue
-        new_value = datetime.strptime(requested_value, '%d-%m-%Y %H:%M') \
+        new_value = datetime.strptime(requested_value, '%Y-%m-%dT%H:%M') \
             if field_name == 'due_date' else requested_value
         setattr(task, field_name, new_value)
     db.session.commit()
@@ -102,9 +102,9 @@ def validate_task_data(task):
     due_date = task.get('due_date')
     if due_date:
         try:
-            datetime.strptime(due_date, '%d-%m-%Y %H:%M')
+            datetime.strptime(due_date, '%Y-%m-%dT%H:%M')
         except ValueError:
-            abort(400, "Incorrect datetime format. Expected DD-MM-YYYY HH:MM")
+            abort(400, "Incorrect datetime format. Expected ISO format: YYYY-MM-DDTHH:MM")
     done = task.get('done')
     if done is not None and done not in (0, 1):
         abort(400, "Incorrect done field value. Expected 0 or 1")

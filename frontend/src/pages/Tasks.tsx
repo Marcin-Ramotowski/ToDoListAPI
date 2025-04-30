@@ -15,13 +15,6 @@ interface Task {
   done: boolean;
 }
 
-const formatDateForApi = (dateStr: string): string => {
-  const [datePart, timePart] = dateStr.split('T');
-  const [year, month, day] = datePart.split('-');
-  const [hours, minutes] = timePart.split(':');
-  return `${day}-${month}-${year} ${hours}:${minutes}`;
-}
-
 const Tasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState({ title: "", description: "", due_date: "", done: false });
@@ -55,13 +48,7 @@ const Tasks = () => {
 
   const handleCreateTask = async () => {
     try {
-      const payload = {
-        ...newTask,
-        due_date: newTask.due_date
-          ? formatDateForApi(newTask.due_date)
-          : "",
-      };
-      const task = await createTask(payload);
+      const task = await createTask(newTask);
       setTasks([...tasks, task]); // List update
       setNewTask({ title: "", description: "", due_date: "", done: false }); // Form reset
     } catch (error) {
@@ -113,14 +100,7 @@ const Tasks = () => {
   
   const handleSaveEdit = async (taskId: number) => {
     try {
-      const payload = {
-        ...editedTask,
-        due_date: editedTask.due_date
-          ? formatDateForApi(editedTask.due_date)
-          : undefined,
-      };
-  
-      const response = await api.patch(`/tasks/${taskId}`, payload);
+      const response = await api.patch(`/tasks/${taskId}`, editedTask);
       setTasks(tasks.map((t) => (t.id === taskId ? response.data : t)));
       setEditingTaskId(null);
       setEditedTask({});
