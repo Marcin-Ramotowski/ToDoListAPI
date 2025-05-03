@@ -22,7 +22,7 @@ const DeleteAccount = () => {
 
   return (
     <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4 text-red-600">⚠️ Usuń konto</h1>
+      <h1 className="text-2xl font-bold mb-4 text-red-600">⚠ Usuń konto</h1>
       <p className="mb-4">
         Tej operacji nie można cofnąć. Aby potwierdzić, wpisz <strong>USUŃ</strong> poniżej:
       </p>
@@ -44,7 +44,7 @@ const DeleteAccount = () => {
             : "bg-gray-300 text-gray-600 cursor-not-allowed"
         }`}
       >
-        🗑️ Potwierdź usunięcie konta
+       🗑 Potwierdź usunięcie konta
       </button>
 
       {error && <p className="text-red-500 mt-2">{error}</p>}

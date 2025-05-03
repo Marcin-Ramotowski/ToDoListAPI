@@ -216,7 +216,7 @@ const Tasks = () => {
                     onClick={() => handleEditTask(task)}
                     className="bg-yellow-400 text-white px-2 py-1 rounded hover:bg-yellow-500"
                   >
-                    ✏️ Edytuj
+                    ✏ Edytuj
                   </button>
                 )}
                 <button
