@@ -61,8 +61,15 @@ Funkcjonalności:
 
 ### 🔧 Backend
 
+Zanim uruchomisz backend, ustaw zmienną do połączenia z bazą danych w następujący sposób:
+1) Jeśli zamierzasz wykorzystać MySQL:
+- SQLALCHEMY_DATABASE_URI=mysql+mysqlconnector://<nazwa_uzytkownika>:<haslo>@<nazwa_hosta_bazy_danych>:<port_bazy_danych>/<nazwa_bazy_danych>
+2) Jeśli zamierzasz skorzystać z SQLite:
+- SQLALCHEMY_DATABASE_URI=sqlite:///test.db
+
 1. Stwórz i aktywuj wirtualne środowisko:
    ```bash
+   cd api
    python -m venv venv
    source venv/bin/activate
    ```
@@ -70,10 +77,9 @@ Funkcjonalności:
    ```bash
    pip install -r requirements.txt
    ```
-3. Utwórz plik `.env` na bazie `.env.example` i uzupełnij dane
-4. Uruchom serwer:
+3. Uruchom serwer:
    ```bash
-   uvicorn app.main:app --reload
+   python3 app.py
    ```
 
 ### 🖥️ Frontend
@@ -101,16 +107,16 @@ Poniżej lista zmiennych środowiskowych dla backendu:
 | ------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
 | `SQLALCHEMY_DATABASE_URI` | ✅        | URI do bazy danych SQLite lub MySQL                             |
 | `JWT_SECRET_KEY`          | ❌        | Klucz JWT używany do podpisywania tokenów (zalecane)                                             |
-| `API_PORT`                | ❌        | Port, na którym uruchamia się API (domyślnie 80)                                                                |
+| `TODOLIST_PORT`                | ❌        | Port, na którym uruchamia się API (domyślnie 80)                                                                |
 | `TODOLIST_ADMIN_USERNAME` | ❌        | Nazwa użytkownika będącego domyślnym administratorem obecnym w bazie po inicjalizacji aplikacji (domyślnie admin). |
 | `TODOLIST_ADMIN_EMAIL` | ❌        | Adres email domyślnego administratora aplikacji (domyślnie admin@example.pl). |
 | `TODOLIST_ADMIN_PASSWORD` | ❌        | Hasło domyślnego administratora aplikacji (zalecane). |
-| `FRONTEND_ORIGIN`         | ✅        | Adres URL frontendu (np. `http://localhost:5173`) do ustawienia CORS/cookies (wymagany do połączenia frontendu z API, można podać więcej adresów rozdzielając je przecinkiem)                     |
+| `FRONTEND_ORIGIN`         | ✅        | Adres URL frontendu (np. `http://localhost:5173`) do ustawienia CORS/cookies (wymagany do połączenia frontendu z API, jeśli działają one w osobnych domenach, można podać więcej adresów rozdzielając je przecinkiem)                    |
 
 Poniżej lista zmiennych środowiskowych dla frontendu:
 | Nazwa                     | Wymagana | Opis                                                                                             |
 | ------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
-| `VITE_API_URL`            | ✅       | Adres URL backendu, z którym komunikuje się frontend. Ustawiany w pliku `frontend/frontend.dockerfile` przed zbudowaniem kontenera. |
+| `VITE_API_URL`            | ✅       | Adres URL backendu, z którym komunikuje się frontend. Ustawiany w pliku `frontend/frontend.dockerfile` przed zbudowaniem kontenera. Domyślnie `/api`, wartość tę zmień tylko, jeśli zamierzasz uruchomić backend nie wykorzystując Dockera lub poza siecią frontendu. |
 ---
 
 ## 📅 Dalsze kroki
@@ -124,4 +130,3 @@ Autor: *Marcin Ramotowski*\
 Licencja: MIT
 
 ---
-
