@@ -122,7 +122,6 @@ Poniżej lista zmiennych środowiskowych dla frontendu:
 ## 📅 Dalsze kroki
 
 - Przygotowanie stylów CSS dla aplikacji
-- Skonteneryzowanie warstwy frontendowej aplikacji
 
 ---
 
